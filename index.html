@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+		
+		<title>Dynamic Layers and Comparison Tool</title>
+		
+		<script type="text/javascript">dojoConfig = {parseOnLoad: true}</script>
+		<script src='//js.arcgis.com/4.2/'></script>
+		<script type="text/javascript" src="config.js"></script>
+		<script type="text/javascript" src="index.js"></script>
+
+		<!-- Calcite Bootstrap -->
+		<!-- <link rel="stylesheet" href="https://esri.github.io/calcite-maps/dist/css/calcite-bootstrap.min-v0.2.css"> -->
+		<!-- Calcite Maps -->
+		<!-- <link rel="stylesheet" href="https://esri.github.io/calcite-maps/dist/css/calcite-maps-arcgis-4.x.min-v0.2.css"> -->
+		
+		<link rel="stylesheet" href="//js.arcgis.com/4.2/dijit/themes/claro/claro.css">
+		<link rel="stylesheet" href="//js.arcgis.com/4.2/esri/css/main.css">
+		<link rel="stylesheet" href="mapCompare.css">
+	</head>
+
+	<body class="claro">
+	  <!-- Main layout -->
+	  <div id="lytMain" class="MainGrid" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="design:'headline'">
+		
+		<!-- Top banner area -->
+		<div id="bcTop" class="gridTop" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'top'">
+			<div data-dojo-type="dijit/layout/BorderContainer">
+				<div id="topTitle" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'left'">Dynamic Mapping</div>
+				<div id="cpRendering" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+					<div id="cboRendering" data-dojo-type="dijit/layout/ContentPane">
+						<div id="pnlCurrentColorRamp">
+							<img class="rampcoloritem" style="background-color:#EEE3C2;"/>
+							<img class="rampcoloritem" style="background-color:#F1C67B;"/>
+							<img class="rampcoloritem" style="background-color:#B0A8A0;"/>
+							<img class="rampcoloritem" style="background-color:#5687B4;"/>
+							<img class="rampcoloritem" style="background-color:#125194;"/>
+						</div>
+						<div id="btnChangeRenderer" data-dojo-type="dijit/form/DropDownButton">
+							<span>Change</span>
+							<div id="dlgRenderer" data-dojo-type="dijit/TooltipDialog">
+								<label for="ddlAlgorithms">Break Type:&nbsp;</label>
+								<select id="ddlAlgorithms" data-dojo-type="dijit/form/Select">
+									<option value="quantile" selected="selected">Quantile</option>
+									<option value="natural-breaks">Natural Breaks</option>
+									<option value="equal-interval">Equal Intervals</option>
+								</select>
+								<div>
+									<div class="colorRamp colorRamp5">
+									<img class="rampcoloritem" style="background-color:#EEE3C2;"/>
+									<img class="rampcoloritem" style="background-color:#F1C67B;"/>
+									<img class="rampcoloritem" style="background-color:#B0A8A0;"/>
+									<img class="rampcoloritem" style="background-color:#5687B4;"/>
+									<img class="rampcoloritem" style="background-color:#125194;"/>
+									</div>
+									<div class="colorRamp colorRamp5">
+									<img class="rampcoloritem" style="background-color:#D7191C;"/>
+									<img class="rampcoloritem" style="background-color:#FDAE61;"/>
+									<img class="rampcoloritem" style="background-color:#FFFFBF;"/>
+									<img class="rampcoloritem" style="background-color:#A6D96A;"/>
+									<img class="rampcoloritem" style="background-color:#1A9641;"/>
+									</div>
+									<div class="colorRamp colorRamp5">
+									<img class="rampcoloritem" style="background-color:#A6611A;"/>
+									<img class="rampcoloritem" style="background-color:#DFC27D;"/>
+									<img class="rampcoloritem" style="background-color:#F5F5F5;"/>
+									<img class="rampcoloritem" style="background-color:#80CDC1;"/>
+									<img class="rampcoloritem" style="background-color:#018571;"/>
+									</div>
+									<div class="colorRamp colorRamp5">
+									<img class="rampcoloritem" style="background-color:#EFF3FF;"/>
+									<img class="rampcoloritem" style="background-color:#BDD7E7;"/>
+									<img class="rampcoloritem" style="background-color:#6BAED6;"/>
+									<img class="rampcoloritem" style="background-color:#3182BD;"/>
+									<img class="rampcoloritem" style="background-color:#08519C;"/>
+									</div>
+
+									<div class="colorRamp colorRamp7">
+									<img class="rampcoloritem" style="background-color:#D73027;"/>
+									<img class="rampcoloritem" style="background-color:#FC8D59;"/>
+									<img class="rampcoloritem" style="background-color:#FEE08B;"/>
+									<img class="rampcoloritem" style="background-color:#FFFFBF;"/>
+									<img class="rampcoloritem" style="background-color:#D9EF8B;"/>
+									<img class="rampcoloritem" style="background-color:#91CF60;"/>
+									<img class="rampcoloritem" style="background-color:#1A9850;"/>
+									</div>
+									<div class="colorRamp colorRamp7">
+									<img class="rampcoloritem" style="background-color:#8C510A;"/>
+									<img class="rampcoloritem" style="background-color:#D8B365;"/>
+									<img class="rampcoloritem" style="background-color:#F6E8C3;"/>
+									<img class="rampcoloritem" style="background-color:#F5F5F5;"/>
+									<img class="rampcoloritem" style="background-color:#C7EAE5;"/>
+									<img class="rampcoloritem" style="background-color:#5AB4AC;"/>
+									<img class="rampcoloritem" style="background-color:#01665E;"/>
+									</div>
+									<div class="colorRamp colorRamp7">
+									<img class="rampcoloritem" style="background-color:#EFF3FF;"/>
+									<img class="rampcoloritem" style="background-color:#C6DBEF;"/>
+									<img class="rampcoloritem" style="background-color:#9ECAE1;"/>
+									<img class="rampcoloritem" style="background-color:#6BAED6;"/>
+									<img class="rampcoloritem" style="background-color:#4292C6;"/>
+									<img class="rampcoloritem" style="background-color:#2171B5;"/>
+									<img class="rampcoloritem" style="background-color:#084594;"/>
+									</div>
+									<div class="colorRamp colorRamp9">
+									<img class="rampcoloritem" style="background-color:#D73027;"/>
+									<img class="rampcoloritem" style="background-color:#F46D43;"/>
+									<img class="rampcoloritem" style="background-color:#FDAE61;"/>
+									<img class="rampcoloritem" style="background-color:#FEE08B;"/>
+									<img class="rampcoloritem" style="background-color:#FFFFBF;"/>
+									<img class="rampcoloritem" style="background-color:#D9EF8B;"/>
+									<img class="rampcoloritem" style="background-color:#A6D96A;"/>
+									<img class="rampcoloritem" style="background-color:#66BD63;"/>
+									<img class="rampcoloritem" style="background-color:#1A9850;"/>
+									</div>
+									<div class="colorRamp colorRamp9">
+									<img class="rampcoloritem" style="background-color:#8C510A;"/>
+									<img class="rampcoloritem" style="background-color:#BF812D;"/>
+									<img class="rampcoloritem" style="background-color:#DFC27D;"/>
+									<img class="rampcoloritem" style="background-color:#F6E8C3;"/>
+									<img class="rampcoloritem" style="background-color:#F5F5F5;"/>
+									<img class="rampcoloritem" style="background-color:#C7EAE5;"/>
+									<img class="rampcoloritem" style="background-color:#80CDC1;"/>
+									<img class="rampcoloritem" style="background-color:#35978F;"/>
+									<img class="rampcoloritem" style="background-color:#01665E;"/>
+									</div>
+									<div class="colorRamp colorRamp9">
+									<img class="rampcoloritem" style="background-color:#F7FBFF;"/>
+									<img class="rampcoloritem" style="background-color:#DEEBF7;"/>
+									<img class="rampcoloritem" style="background-color:#C6DBEF;"/>
+									<img class="rampcoloritem" style="background-color:#9ECAE1;"/>
+									<img class="rampcoloritem" style="background-color:#6BAED6;"/>
+									<img class="rampcoloritem" style="background-color:#4292C6;"/>
+									<img class="rampcoloritem" style="background-color:#2171B5;"/>
+									<img class="rampcoloritem" style="background-color:#08519C;"/>
+									<img class="rampcoloritem" style="background-color:#08306B;"/>
+									</div>
+								</div>
+							</div>
+						</div>
+						<button id="btnAddMap" class="btnAddMap" type="button" data-dojo-type="dijit/form/Button">Add Map</button>
+					</div>
+					
+					
+					
+				</div>
+			</div>
+		</div> 
+		
+		<!-- Center maps area -->
+		<div id="bcCenter" class="gridCenter" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+			
+			<!-- <div id="mapDiv" style="height:100%; width:100%;"/> -->
+<!-- 			<div id="maps" data-dojo-id="maps" data-dojo-type="dojox/layout/GridContainer"
+				 data-dojo-props="nbZones:1, isAutoOrganized:true">			
+				 
+			</div> -->
+		</div> 
+		
+		
+	  </div> 
+	</body>
+</html>
