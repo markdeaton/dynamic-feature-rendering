@@ -32,18 +32,27 @@ body, html {
 .gridLeft {
 	width: 		125px;
 }
-
+.ddlAttrs {
+	margin-top:	3px;
+}
 .DynamicMapPane {
+	display:	flex;
 	flex:		1 1 0px;
+	flex-wrap:	wrap;
+	padding-right:8px;
 }
 .esri-ui-corner {
 	opacity:	0.7;
 }
+.mapPaneTopBar {
+	display:	inline-block;
+	top:		5px;
+	height:		40px;
+	width:		100%;
+}
 .mapPaneCloseButton {
-	position: 	absolute;
 	opacity:	0.75;
-	top:		10px;
-	right:		10px;
+	float:		right;
 }
 .mapPaneCloseButton:hover {
 	opacity:	1.0;

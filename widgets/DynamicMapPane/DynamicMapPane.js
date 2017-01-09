@@ -107,15 +107,19 @@ function(
 					alert("Problem loading the layer: " + error);
 				});
 			
+			// Add dropdown and close button along top of map
+			var topBar = domConstruct.create("div", {"class":"mapPaneTopBar"}, this.containerNode, "first");
+			
 			var store = new MemoryStore({"data":this.attrFields, "idProperty":"name"});
 			var objStore = new ObjectStore({"objectStore":store});
 			this.cboAttrs = new FilteringSelect({"store":objStore, "searchAttr":"alias", "labelAttr":"alias",
-					"autoComplete":true, "autoWidth":true, "mapView":this.mapView});
+					"autoComplete":true, "autoWidth":true, "mapView":this.mapView, "class":"ddlAttrs"});
 			on(this.cboAttrs, "change", lang.hitch(this, onAttrChange));
-			this.addChild(this.cboAttrs, 0);
+			domConstruct.place(this.cboAttrs.domNode, topBar);			
 			this.cboAttrs.startup();
 
-			this.imgClose = domConstruct.create("img", {"class":"mapPaneCloseButton", "title":"Close", "src":"img/close_red.png"}, this.domNode);
+			this.imgClose = domConstruct.create("img", {"class":"mapPaneCloseButton", "title":"Close", "src":"img/close_red.png"}, topBar);
+			
 			// this.startup();
 		},
 		

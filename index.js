@@ -119,6 +119,9 @@ function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, reg
 		});
 		bcCenter.addChild(cPane1);
 		mapPanes.push(cPane1);
+/* 		array.forEach(mapPanes, function(mapPane) {
+			mapPane.resize();
+		}); */
 	}
 	
 	// Return an array of the usable attribute aliases
