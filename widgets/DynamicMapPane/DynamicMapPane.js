@@ -40,7 +40,7 @@ function(
 	return declare("apl.DynamicMapPane", ContentPane, {
 
 		/* Class vars here */
-		class:		"MapPane",
+		baseClass:	"DynamicMapPane",
 		cboAttrs:	null,
 		mapId:		null,
 		portalUrl:	null,
@@ -116,8 +116,6 @@ function(
 			this.cboAttrs.startup();
 
 			this.imgClose = domConstruct.create("img", {"class":"mapPaneCloseButton", "title":"Close", "src":"img/close_red.png"}, this.domNode);
-
-			domClass.add(this.domNode, "DynamicMapPane");
 			// this.startup();
 		},
 		

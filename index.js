@@ -23,7 +23,7 @@ require([
 	"esri/Color",
 	"esri/symbols/SimpleFillSymbol",
 	"esri/request",
-	"./DynamicMapPane.js", 
+	"./widgets/DynamicMapPane/DynamicMapPane.js", 
 	"dojo/ready"],
 function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, registry, 
 	GridContainer, ContentPane, TitlePane,
