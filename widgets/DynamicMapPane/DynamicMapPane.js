@@ -9,6 +9,7 @@ define([
 	"dojo/dom-class",
 	"dojo/on",
 	"dojo/query",
+	"dijit/_WidgetBase",
 	"dojo/_base/Color",
 	"dojo/store/Memory",
 	"dojo/data/ObjectStore",
@@ -28,8 +29,8 @@ define([
 	"esri/renderers/smartMapping/statistics/classBreaks",
 	"dojo/domReady!"],
 function(
-	declare, lang, array, dom, domConstruct, domStyle, domClass, on, query, Color,
-	MemoryStore, ObjectStore,
+	declare, lang, array, dom, domConstruct, domStyle, domClass, on, query, _WidgetBase,
+	Color, MemoryStore, ObjectStore,
 	registry,
 	ContentPane, TitlePane, FilteringSelect, Select, ComboBox, Tooltip,
 	Map, MapView, Home, MapImageLayer, 
@@ -37,7 +38,7 @@ function(
 	
 	
 	/* Class declaration in JSON form */
-	return declare("apl.DynamicMapPane", ContentPane, {
+	return declare("apl.DynamicMapPane", [ContentPane], {
 
 		/* Class vars here */
 		baseClass:	"DynamicMapPane",
@@ -91,6 +92,7 @@ function(
 				map: map,
 				container: this.containerNode // DOM element to hold the map view
 			});
+			this.mapView.on("layerview-destroy", lang.hitch(this, onLayerViewDestroy));
 			
 			var home = new Home({"view":this.mapView});
 			this.mapView.ui.add(home, "top-left");
@@ -119,12 +121,19 @@ function(
 			this.cboAttrs.startup();
 
 			this.imgClose = domConstruct.create("img", {"class":"mapPaneCloseButton", "title":"Close", "src":"img/close_red.png"}, topBar);
+			on(this.imgClose, "click", lang.hitch(this, function() {
+				this.emit("closeMap");
+			}));
 			
 			// this.startup();
 		},
 		
 		startup: function() {
 			this.inherited(arguments);
+/* 			var tooltip = new Tooltip({
+				"connectId"	:	[this.cboAttrs.domNode],
+				"label"		:	"Choose an attribute to map."
+			}); */
 			Tooltip.show("Choose an attribute to map.", this.cboAttrs.domNode);
 		},
 		
@@ -154,7 +163,7 @@ function(
 				var cbr = new ClassBreaksRenderer({
 					"field"				: attrFldName,
 					"classBreakInfos"	: breakInfos,
-					defaultSymbol		: this.noDataSymbol
+					"defaultSymbol"		: this.noDataSymbol
 				});
 				this.attrSubLyr.renderer = cbr;
 			}))
@@ -173,5 +182,9 @@ function(
 
 	function onAttrChange() {
 		this.reRender();
+	}
+	
+	function onLayerViewDestroy() {
+		console.log("layerview destroy");
 	}
 });

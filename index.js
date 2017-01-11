@@ -15,6 +15,7 @@ require([
 	"dojo/topic",
 	"dijit/form/Button",
 	"dijit/form/DropDownButton",
+	"dijit/Tooltip",
 	"esri/Map",
 	"esri/views/MapView",
 	"esri/layers/MapImageLayer",
@@ -27,7 +28,7 @@ require([
 	"dojo/ready"],
 function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, registry, 
 	GridContainer, ContentPane, TitlePane,
-	topic, Button, DropDownButton,
+	topic, Button, DropDownButton, Tooltip,
 	Map, MapView, MapImageLayer, FeatureLayer, Field, 
 	Color, SimpleFillSymbol, esriRequest, 
 	DynMapPane, ready){
@@ -118,10 +119,8 @@ function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, reg
 			"noDataSymbol":noDataSymbol
 		});
 		bcCenter.addChild(cPane1);
+		on(cPane1, "closemap", onCloseMap);
 		mapPanes.push(cPane1);
-/* 		array.forEach(mapPanes, function(mapPane) {
-			mapPane.resize();
-		}); */
 	}
 	
 	// Return an array of the usable attribute aliases
@@ -153,6 +152,16 @@ function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, reg
 	function reRenderAllMaps() {
 		array.forEach(mapPanes, function(mapPane) {
 			mapPane.reRender();
+		});
+	}
+	
+	function onCloseMap(evt) {
+		var mapPane = evt.currentTarget;
+		console.log("close map " + mapPane.id);
+		domConstruct.destroy(mapPane);
+		mapPanes = array.filter(mapPanes, function(mapPaneProposed) {
+			Tooltip.hide(mapPaneProposed.cboAttrs.domNode);
+			return !(mapPaneProposed.containerNode === mapPane);
 		});
 	}
 });
