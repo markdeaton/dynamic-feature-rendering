@@ -23,19 +23,21 @@ require([
 	"esri/layers/support/Field",
 	"esri/request",
 	"./widgets/DynamicMapPane/DynamicMapPane.js", 
+	"./utility/Util.js",
 	"dojo/ready"],
 function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, registry, 
 	GridContainer, ContentPane, TitlePane,
 	topic, Button, DropDownButton, Tooltip,
 	Map, MapView, MapImageLayer, FeatureLayer, Field, esriRequest, 
-	DynMapPane, ready){
+	DynMapPane, Util, ready){
 			
 	var attrFields = []; // Numeric attributes suitable for mapping choropleth-style
 	var mapPanes = [];	 // List of maps open
 	var bcCenter = null; // Border container containing maps
 	var lyrFeatures; // Parameters needed to create a new map pane
+	var utils = new Util();
 	
-	ready(function(){
+	ready(function(){		
 		bcCenter = registry.byId("bcCenter");
 
 		getAttributeInfo();
@@ -82,9 +84,7 @@ function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, reg
 				attrFields = array.filter(fields, function(field) {
 					// Only use fields that are numeric and don't match certain blacklisted names
 					return	( field.type === "integer" || field.type === "small-integer" || field.type === "single" || field.type === "double" )
-						&&	!array.some(settings.fieldsToIgnore, function(fldNameToIgnore) {
-							return field.alias.toLowerCase().startsWith(fldNameToIgnore.toLowerCase());
-						});
+						&&		!utils.isFieldIgnored(field.name, settings.fieldsToIgnore)
 				});
 				console.log(attrFields.length + ":\n" + attributeNames().join(",\n"));
 				
@@ -150,3 +150,4 @@ function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, reg
 		});
 	}
 });
+

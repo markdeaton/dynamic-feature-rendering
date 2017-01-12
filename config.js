@@ -41,8 +41,9 @@ var settings = {
   },
   
   "initialMapDataset" : "2010 Total Population (U.S. Census)",
-  "fieldsToIgnore"	  : ["Shape_Length", "FIPS", "FIPS_INT", "OBJECTID", "ID"],
-  
+  "fieldsToIgnore"	  : ["Shape_Length*", "Shape_Area*", "FIPS", "FIPS_INT", "OBJECTID*", "ID"],
+  "popupTitleField"		: "NAME",
+	
 	"imageFormat"   : "png8",
   
 	"publishingFeatureService"  : "http://maps.esri.com/apl12/rest/services/DynamicLayers/HealthIndicators/MapServer/2",
@@ -187,4 +188,4 @@ var settings = {
 // These shouldn't ever need to change...
 const MAX_MAPS = 4;
 // # bars in the bar chart above the range histo slider
-const HISTOSLIDER_BARS = 30;
+const HISTOSLIDER_BARS = 20;

@@ -28,8 +28,10 @@ define([
 	"esri/symbols/SimpleFillSymbol",
 	"esri/renderers/ClassBreaksRenderer",
 	"esri/renderers/smartMapping/statistics/classBreaks",
+	"esri/renderers/smartMapping/statistics/histogram",
 	"esri/tasks/QueryTask",
 	"esri/tasks/support/Query",
+	"./utility/Util.js",
 	"dojo/domReady!"],
 function(
 	declare, lang, array, dom, domConstruct, domStyle, domClass, on, query, _WidgetBase,
@@ -37,8 +39,9 @@ function(
 	registry,
 	ContentPane, TitlePane, FilteringSelect, Select, ComboBox, Tooltip,
 	Map, MapView, Home, MapImageLayer, 
-	Color, SimpleFillSymbol, ClassBreaksRenderer, classBreaks,
-	QueryTask, Query) {
+	Color, SimpleFillSymbol, ClassBreaksRenderer, classBreaks, esriHistogram,
+	QueryTask, Query,
+	Util) {
 	
 	
 	/* Class declaration in JSON form */
@@ -46,19 +49,20 @@ function(
 
 		/* Class vars here */
 		baseClass:	"DynamicMapPane",
-		cboAttrs:	null,
-		mapId:		null,
+		cboAttrs:		null,
+		mapId:			null,
 		portalUrl:	null,
 		attrFields:	null,
 		attrSubLyr:	null,
 		attrSubLyrId:null,
 		attrFeatLyr:null,
 		noDataSymbol:null,
-		imgClose:	null,
-		mapView:	null,
+		imgClose:		null,
+		mapView:		null,
 		mapImageLyr:null,
 		queryTask:	null,
-		
+		histogram:	null,
+		utils:			new Util(),
 		
 		/* Constructor */
 		constructor: function(parameters) {
@@ -201,6 +205,14 @@ function(
 
 	function onAttrChange() {
 		this.reRender();
+		// Get statistics
+		esriHistogram({"layer":this.attrFeatLyr, "field":this.cboAttrs.getValue(), "classificationMethod":"equal-interval", "numBins":HISTOSLIDER_BARS})
+			.then(function(result) {
+				console.log("histogram success");
+				this.histogram = result;
+			}).otherwise(function(err) {
+				console.error("Histogram generation error: " + err.message);
+			});
 	}
 	
 	function onLayerViewDestroy() {
@@ -214,17 +226,22 @@ function(
 			console.log("query complete");
 			if (result.features.length <= 0) return;
 			var feat = result.features[0];
-			var title = feat.attributes["NAME"];
+			// var title = feat.attributes[settings.popupTitleField];
+			var title = feat.attributes.NAME + ", " + feat.attributes.ST_ABBREV;
 			var content = "<table>"
+			content += "<tr> <td><b>Field Name</b></td> <td><b>Value</b></td> </tr>"
 			var ignoreList = settings.fieldsToIgnore;
+			
 			for (fieldName in feat.attributes) {
-				var bFieldInIgnoreList = array.some(ignoreList, function(fieldToIgnore) {
-					return fieldName.toLowerCase() === fieldToIgnore.toLowerCase();
-				});
+				var bFieldInIgnoreList = this.utils.isFieldIgnored(fieldName, ignoreList);
 				if (!bFieldInIgnoreList) {
-					content += "<tr><td>";
-					//var fieldAlias = feat.fields[attr].alias;
-					content += fieldName;
+					content += "<tr><td title='" + fieldName + "'>";
+					// Find the field's alias
+					var thisField = array.filter(result.fields, function(f) {
+						return f.name === fieldName;
+					});
+					var fieldAlias = thisField[0].alias;
+					content += fieldAlias;
 					content += "</td><td>";
 					content += feat.attributes[fieldName];
 					content += "</td></tr>";
@@ -234,7 +251,7 @@ function(
 			this.mapView.popup.open({"title":title, "location":evtClick.mapPoint});
 			this.mapView.popup.content = content;
 		})).otherwise(function(err) {
-			console.log("query error");
+			console.error("Problem with identify: " + err.message);
 		});
 	}
 });
