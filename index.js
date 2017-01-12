@@ -21,22 +21,19 @@ require([
 	"esri/layers/MapImageLayer",
 	"esri/layers/FeatureLayer",
 	"esri/layers/support/Field",
-	"esri/Color",
-	"esri/symbols/SimpleFillSymbol",
 	"esri/request",
 	"./widgets/DynamicMapPane/DynamicMapPane.js", 
 	"dojo/ready"],
 function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, registry, 
 	GridContainer, ContentPane, TitlePane,
 	topic, Button, DropDownButton, Tooltip,
-	Map, MapView, MapImageLayer, FeatureLayer, Field, 
-	Color, SimpleFillSymbol, esriRequest, 
+	Map, MapView, MapImageLayer, FeatureLayer, Field, esriRequest, 
 	DynMapPane, ready){
 			
 	var attrFields = []; // Numeric attributes suitable for mapping choropleth-style
 	var mapPanes = [];	 // List of maps open
 	var bcCenter = null; // Border container containing maps
-	var lyrFeatures, symNoData; // Parameters needed to create a new map pane
+	var lyrFeatures; // Parameters needed to create a new map pane
 	
 	ready(function(){
 		bcCenter = registry.byId("bcCenter");
@@ -48,7 +45,7 @@ function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, reg
 		setupBreakAlgorithms();
 		
 		on(registry.byId("btnAddMap"), "click", function(evt) {
-			createMapPane("", lyrFeatures, symNoData);
+			createMapPane("", lyrFeatures);
 		});
 /* 		var cpane2 = new DynMapTitlePane({title:"cpane2", content: "Content Pane 2 : Drag Me !"});
 		var cpane3 = new DynMapTitlePane({title:"cpane3", content: "Content Pane 3 : Drag Me !"});
@@ -90,20 +87,8 @@ function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, reg
 						});
 				});
 				console.log(attrFields.length + ":\n" + attributeNames().join(",\n"));
-				var fillColor = new Color(settings.noDataSymbol.color);
-				fillColor.a = settings.noDataSymbol.alpha;
-				var outlineColor = new Color(settings.noDataSymbol.outlineColor);
-				outlineColor.a = settings.noDataSymbol.outlineAlpha;
-				symNoData = new SimpleFillSymbol({
-					"style"	: settings.noDataSymbol.style,
-					"color"	: fillColor,
-					"outline" : {
-						"color"	: outlineColor,
-						"width"	: settings.noDataSymbol.outlineWidth
-					}
-				});
 				
-				createMapPane("", lyrFeatures, symNoData);
+				createMapPane("", lyrFeatures);
 			})
 			.otherwise(function(err) {
 				alert("Error loading feature attributes: " + err.message);
@@ -111,12 +96,11 @@ function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, reg
 		});
 	}
 	
-	function createMapPane(title, attrFeatLyr, noDataSymbol) {
+	function createMapPane(title, attrFeatLyr) {
 		var cPane1 = new DynMapPane({
 			title:title, 
 			"portalUrl":settings.mapService.portalUrl, "mapId":settings.mapService.itemId,
-			"attrSubLyrId":settings.mapService.attrLyrId, "attrFeatLyr":attrFeatLyr, "attrFields":attrFields,
-			"noDataSymbol":noDataSymbol
+			"attrSubLyrId":settings.mapService.attrLyrId, "attrFeatLyr":attrFeatLyr, "attrFields":attrFields
 		});
 		bcCenter.addChild(cPane1);
 		on(cPane1, "closemap", onCloseMap);
@@ -159,6 +143,7 @@ function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, reg
 		var mapPane = evt.currentTarget;
 		console.log("close map " + mapPane.id);
 		domConstruct.destroy(mapPane);
+		// Remove the closed map from the master mapPane list
 		mapPanes = array.filter(mapPanes, function(mapPaneProposed) {
 			Tooltip.hide(mapPaneProposed.cboAttrs.domNode);
 			return !(mapPaneProposed.containerNode === mapPane);

@@ -41,7 +41,7 @@ var settings = {
   },
   
   "initialMapDataset" : "2010 Total Population (U.S. Census)",
-  "fieldsToIgnore"	  : ["Shape_Length", "Shape_Area", "FIPS"],
+  "fieldsToIgnore"	  : ["Shape_Length", "FIPS", "FIPS_INT", "OBJECTID", "ID"],
   
 	"imageFormat"   : "png8",
   

@@ -34,6 +34,7 @@ body, html {
 }
 .ddlAttrs {
 	margin-top:	3px;
+	width:		75%;
 }
 .DynamicMapPane {
 	display:	flex;

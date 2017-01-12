@@ -24,17 +24,21 @@ define([
 	"esri/views/MapView",
 	"esri/widgets/Home",
 	"esri/layers/MapImageLayer",
+	"esri/Color",
 	"esri/symbols/SimpleFillSymbol",
 	"esri/renderers/ClassBreaksRenderer",
 	"esri/renderers/smartMapping/statistics/classBreaks",
+	"esri/tasks/QueryTask",
+	"esri/tasks/support/Query",
 	"dojo/domReady!"],
 function(
 	declare, lang, array, dom, domConstruct, domStyle, domClass, on, query, _WidgetBase,
-	Color, MemoryStore, ObjectStore,
+	dojoColor, MemoryStore, ObjectStore,
 	registry,
 	ContentPane, TitlePane, FilteringSelect, Select, ComboBox, Tooltip,
 	Map, MapView, Home, MapImageLayer, 
-	SimpleFillSymbol, ClassBreaksRenderer, classBreaks) {
+	Color, SimpleFillSymbol, ClassBreaksRenderer, classBreaks,
+	QueryTask, Query) {
 	
 	
 	/* Class declaration in JSON form */
@@ -53,6 +57,7 @@ function(
 		imgClose:	null,
 		mapView:	null,
 		mapImageLyr:null,
+		queryTask:	null,
 		
 		
 		/* Constructor */
@@ -62,7 +67,19 @@ function(
 			this.attrFields = parameters.attrFields;
 			this.attrSubLyrId = parameters.attrSubLyrId;
 			this.attrFeatLyr = parameters.attrFeatLyr;
-			this.noDataSymbol = parameters.noDataSymbol;
+
+			var fillColor = new Color(settings.noDataSymbol.color);
+			fillColor.a = settings.noDataSymbol.alpha;
+			var outlineColor = new Color(settings.noDataSymbol.outlineColor);
+			outlineColor.a = settings.noDataSymbol.outlineAlpha;
+			this.noDataSymbol = new SimpleFillSymbol({
+				"style"	: settings.noDataSymbol.style,
+				"color"	: fillColor,
+				"outline" : {
+					"color"	: outlineColor,
+					"width"	: settings.noDataSymbol.outlineWidth
+				}
+			});
 		},
 		
 
@@ -82,6 +99,7 @@ function(
 					return lyrTest.id == this.attrSubLyrId;
 				}));
 				this.attrSubLyr = aLyrNeeded[0];
+				this.queryTask = new QueryTask({"url": this.attrSubLyr.url});
 			}));
 			
 			var map = new Map({
@@ -93,6 +111,7 @@ function(
 				container: this.containerNode // DOM element to hold the map view
 			});
 			this.mapView.on("layerview-destroy", lang.hitch(this, onLayerViewDestroy));
+			this.mapView.on("click", lang.hitch(this, onIdentify));
 			
 			var home = new Home({"view":this.mapView});
 			this.mapView.ui.add(home, "top-left");
@@ -145,7 +164,7 @@ function(
 			var imgs = dojo.query("#pnlCurrentColorRamp>img");
 			imgs.forEach(function(img, index) {
 				var sColor = (domStyle.get(img, "background-color"));
-				var color = Color.fromRgb(sColor);
+				var color = dojoColor.fromRgb(sColor);
 				colors.push(color);
 			});
 			
@@ -186,5 +205,36 @@ function(
 	
 	function onLayerViewDestroy() {
 		console.log("layerview destroy");
+	}
+	
+	function onIdentify(evtClick) {
+		// attrSubLyr = the layer to query
+		var query = new Query({"geometry":evtClick.mapPoint, "outFields":["*"], "num":1});
+		this.queryTask.execute(query).then(lang.hitch(this, function(result) {
+			console.log("query complete");
+			if (result.features.length <= 0) return;
+			var feat = result.features[0];
+			var title = feat.attributes["NAME"];
+			var content = "<table>"
+			var ignoreList = settings.fieldsToIgnore;
+			for (fieldName in feat.attributes) {
+				var bFieldInIgnoreList = array.some(ignoreList, function(fieldToIgnore) {
+					return fieldName.toLowerCase() === fieldToIgnore.toLowerCase();
+				});
+				if (!bFieldInIgnoreList) {
+					content += "<tr><td>";
+					//var fieldAlias = feat.fields[attr].alias;
+					content += fieldName;
+					content += "</td><td>";
+					content += feat.attributes[fieldName];
+					content += "</td></tr>";
+				}
+			}
+			content += "</table>";
+			this.mapView.popup.open({"title":title, "location":evtClick.mapPoint});
+			this.mapView.popup.content = content;
+		})).otherwise(function(err) {
+			console.log("query error");
+		});
 	}
 });
