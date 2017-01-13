@@ -63,6 +63,8 @@ function(
 		queryTask:	null,
 		histogram:	null,
 		utils:			new Util(),
+		extentWatcher:null,
+		initialRequestedExtent:null,
 		
 		/* Constructor */
 		constructor: function(parameters) {
@@ -84,6 +86,7 @@ function(
 					"width"	: settings.noDataSymbol.outlineWidth
 				}
 			});
+			this.initialRequestedExtent = parameters.mapExtent;
 		},
 		
 
@@ -121,11 +124,11 @@ function(
 			this.mapView.ui.add(home, "top-left");
 			
 			this.mapView.whenLayerView(this.mapImageLyr)
-				.then(function(layerView) {
+				.then(lang.hitch(this, function(layerView) {
 					/* Set up initial rendering params here */
 					console.log("loaded mapView");
-					
-				}, function(error) {
+					this.watchExtentChanges(true);
+				}), function(error) {
 					alert("Error loading the layer: " + error)
 				})
 				.otherwise(function(error) {
@@ -195,14 +198,39 @@ function(
 			});
 		},
 		
-		setCloseButtonVisibility(bVisible) {
+		syncMapExtent: function(extent) {
+			if (this.extentWatcher != null) this.extentWatcher.remove();
 			
+			if (extent != null) this.mapView.extent = extent;
+			
+		},
+		
+		interactionWatcher: null,
+		bInteracting:				false,
+		
+		watchExtentChanges: function(bEnable) {
+			if (bEnable) {
+/* 				this.extentWatcher = this.mapView.watch("extent", lang.hitch(this, function(newValue, oldValue, property, object) {
+					// console.log("dynMapPane mapextentchange");
+					this.emit("mapextentchange");
+				}));  */
+				this.interactionWatcher = this.mapView.watch("interacting,animation", lang.hitch(this, function(newValue, oldValue, property, object) {
+					this.bInteracting = (!(!newValue));
+					console.log("map interacting: " + this.bInteracting);
+					if (!this.bInteracting) this.emit("mapextentchange");
+				}));
+			} else {
+				if (this.extentWatcher) this.extentWatcher.remove();
+				if (this.interactionWatcher) this.interactionWatcher.remove();
+			}
 		}
+	
+		// setCloseButtonVisibility(bVisible) {}
 		
 	});
 	
 	/* Class methods here */
-
+	
 	function onAttrChange() {
 		this.reRender();
 		// Get statistics

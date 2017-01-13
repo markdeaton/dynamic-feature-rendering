@@ -29,13 +29,14 @@ function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, reg
 	GridContainer, ContentPane, TitlePane,
 	topic, Button, DropDownButton, Tooltip,
 	Map, MapView, MapImageLayer, FeatureLayer, Field, esriRequest, 
-	DynMapPane, Util, ready){
+	DynMapPane, Util, ready) {
 			
 	var attrFields = []; // Numeric attributes suitable for mapping choropleth-style
 	var mapPanes = [];	 // List of maps open
 	var bcCenter = null; // Border container containing maps
 	var lyrFeatures; // Parameters needed to create a new map pane
 	var utils = new Util();
+	var mapExtent = null; // Used to sync pan & zoom among maps
 	
 	ready(function(){		
 		bcCenter = registry.byId("bcCenter");
@@ -100,10 +101,14 @@ function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, reg
 		var cPane1 = new DynMapPane({
 			title:title, 
 			"portalUrl":settings.mapService.portalUrl, "mapId":settings.mapService.itemId,
-			"attrSubLyrId":settings.mapService.attrLyrId, "attrFeatLyr":attrFeatLyr, "attrFields":attrFields
+			"attrSubLyrId":settings.mapService.attrLyrId, "attrFeatLyr":attrFeatLyr, "attrFields":attrFields,
+			"mapExtent":mapExtent
 		});
 		bcCenter.addChild(cPane1);
+
 		on(cPane1, "closemap", onCloseMap);
+		on(cPane1, "mapextentchange", onMapExtentChange);
+		
 		mapPanes.push(cPane1);
 	}
 	
@@ -140,14 +145,32 @@ function(parser, on, query, dom, topic, domClass, domConstruct, lang, array, reg
 	}
 	
 	function onCloseMap(evt) {
-		var mapPane = evt.currentTarget;
-		console.log("close map " + mapPane.id);
-		domConstruct.destroy(mapPane);
-		// Remove the closed map from the master mapPane list
+		var mapPaneNode = evt.currentTarget;
+		evt.detail.widget.extentWatcher.remove();
+		console.log("close map " + mapPaneNode.id);
+		domConstruct.destroy(mapPaneNode);
+		// Remove the closed map from the master mapPaneNode list
 		mapPanes = array.filter(mapPanes, function(mapPaneProposed) {
 			Tooltip.hide(mapPaneProposed.cboAttrs.domNode);
-			return !(mapPaneProposed.containerNode === mapPane);
+			return !(mapPaneProposed.containerNode === mapPaneNode);
 		});
+	}
+	
+	function onMapExtentChange(evt) {
+		var generatingMapPane = evt.detail.widget;
+		var newExtent = generatingMapPane.mapView.extent;
+		console.log("map extent change: " + newExtent.xmax + ", " + newExtent.xmin + "; " + newExtent.ymax + ", " + newExtent.ymin);
+		this.mapExtent = newExtent;
+		array.forEach(mapPanes, lang.hitch(this, function(mapPane) {
+			// This logic doesn't seem to work; the equals clause returns false negatives
+			// Instead, use a special setter that won't fire a mapextentchange event
+			if ( !(mapPane === generatingMapPane) || !(newExtent.equals(mapPane.mapView.extent)) ) {
+				mapPane.mapView.extent = newExtent;
+				
+			}
+/* 				if (!(mapPane === generatingMapPane))
+					mapPane.setMapExtent(this.mapExtent); */
+		}));
 	}
 });
 
